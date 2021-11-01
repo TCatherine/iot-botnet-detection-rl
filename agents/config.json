@@ -1,0 +1,27 @@
+{
+"GeneralInfo": {
+	"Number Agents": 2,
+	"Number Clients": 3,
+	"Number Bots": 5,
+	"First Port":5555,
+	"Number Features": 10,
+	"Reward": {
+		"TP":5,
+		"TN":10,
+		"FP":-10,
+		"FN":-3			
+		}
+	},
+"Config Clear Traffic": {
+	"DataRate": ["5Mbps", "14Kbps", "8048kbps"],
+	"PacketSize": [600, 512, 1024, 1040],
+	"Delay": ["2ms", "1ms"],
+	"Number Packets": [1, 2, 3, 4, 5]
+	},
+"Config DDOS": {
+	"DataRate": ["25Mbps", "50Mbps", "125Mbps", "20480Kbps"],
+	"PacketSize": [600, 512, 1024, 1040],
+	"Delay": ["1ms"],
+	"Number Packets": [1, 2, 5, 10, 15]
+	}
+}
