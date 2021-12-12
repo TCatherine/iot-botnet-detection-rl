@@ -1,27 +1,36 @@
 {
 "GeneralInfo": {
-	"Number Agents": 2,
-	"Number Clients": 3,
-	"Number Bots": 5,
+	"Number Agents": 3,
+	"Number Clients": 5,
+	"Number Bots": 15,
 	"First Port":5555,
-	"Number Features": 10,
+	"Number Features": 7,
+	"IsEnableCommunication": 1,
+	"IsFeature": 1,
+	"WeightPath": [
+		"simple_model.pth",
+		"agents_with_com0.pth",
+		"agents_with_com1.pth"
+		],
 	"Reward": {
-		"TP":5,
-		"TN":10,
-		"FP":-10,
-		"FN":-3			
+		"TP":2,
+		"TN":2,
+		"FP":-1,
+		"FN":-1			
 		}
 	},
 "Config Clear Traffic": {
 	"DataRate": ["5Mbps", "14Kbps", "8048kbps"],
-	"PacketSize": [600, 512, 1024, 1040],
+	"PacketSize": [56, 600, 512, 1024, 1040],
 	"Delay": ["2ms", "1ms"],
 	"Number Packets": [1, 2, 3, 4, 5]
 	},
 "Config DDOS": {
 	"DataRate": ["25Mbps", "50Mbps", "125Mbps", "20480Kbps"],
-	"PacketSize": [600, 512, 1024, 1040],
-	"Delay": ["1ms"],
+	"PacketSize": [56, 600, 512, 1024, 1040],
+	"Delay": ["1ms", "0.1ms"],
 	"Number Packets": [1, 2, 5, 10, 15]
 	}
 }
+
+
