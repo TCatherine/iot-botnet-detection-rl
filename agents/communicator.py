@@ -1,6 +1,3 @@
-
-
-
 class Communicator:
     def __init__(self, num_agent):
         self.num_agent= num_agent

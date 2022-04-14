@@ -19,6 +19,11 @@ pip3 install ./src/opengym/model/ns3gym
 #run enviroment
 ./waf --run "my_env"
 
+docker build -t ns3 . --no-cache
+docker run -it --rm ns3 /bin/bash
+docker build -t agents .
 #run python
 cd agent
 ./python main.py
+
+docker build -t project .

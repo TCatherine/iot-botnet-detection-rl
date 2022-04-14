@@ -4,7 +4,7 @@
 // for convenience
 using json = nlohmann::json;
 
-static const std::string path_config = "../agents/config.json";
+static const std::string path_config = "config.json";
 uint16_t number_of_bots, number_of_clients, number_of_iot;
 config clear_traffic;
 config ddos_traffic;
