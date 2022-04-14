@@ -5,6 +5,7 @@
 	"Number Bots": 15,
 	"First Port":5555,
 	"Number Features": 7,
+	"IsTracing": true,
 	"IsEnableCommunication": 1,
 	"IsFeature": 1,
 	"WeightPath": [

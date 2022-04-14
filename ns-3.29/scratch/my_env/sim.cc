@@ -110,6 +110,8 @@ int  main (int argc, char *argv[])
 
 		Ptr<IOTApplication> iot_app = CreateObject<IOTApplication> ();
 		iot_app->Setup (i, iotNodes.Get (i), addr, TCP_SINK_PORT,  1040, 1000, DataRate ("1Mbps"));
+		if (is_tracing)
+			iot_app->SetTracing("Pcap_" + std::to_string(i));
 		iotNodes.Get (i)->AddApplication (iot_app);
 		iot_app->SetStartTime (Seconds (1.));
 	}

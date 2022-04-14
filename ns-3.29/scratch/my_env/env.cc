@@ -13,7 +13,7 @@ namespace ns3 {
   IotEnv::IotEnv ()
   {
     NS_LOG_FUNCTION (this);
-    m_interval = MilliSeconds(500);
+    m_interval = Seconds(500);
     cur_reward = 0;
     fp = 0;
     fn = 0;
@@ -25,7 +25,7 @@ namespace ns3 {
   IotEnv::IotEnv (uint32_t agentId, Time stepTime)
   {
     NS_LOG_FUNCTION (this);
-    m_interval = Seconds(30);
+    m_interval = Seconds(60);
     m_agentId = agentId;
     m_interval = stepTime;
     cur_reward = 0;
@@ -189,7 +189,6 @@ namespace ns3 {
     }
 
     printf("Attack %d Reward: %f\n", is_attack[m_agentId], cur_reward);
-    // std::cout << "Attack " << is_attack[m_agentId] << " Reward: " << cur_reward << std::endl;
     m_application->PacketFlowClear();
     return true;
   }

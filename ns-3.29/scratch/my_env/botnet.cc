@@ -13,10 +13,10 @@ void botnet_timer_setup() {
 	if (timer->trigger)
 		return;
 
-	uint16_t delay = rand() % 21000 + 12000;
-	uint16_t work_time = rand() % 12000 + 10000;
-	timer->start = MilliSeconds(delay) + Simulator::Now();
-	timer->finish = MilliSeconds(work_time) + timer->start;
+	uint16_t delay = rand() % 30000 + 20000;
+	uint16_t work_time = rand() % 30000 + 10000;
+	timer->start = Seconds(delay) + Simulator::Now();
+	timer->finish = Seconds(work_time) + timer->start;
 	timer->interval = MilliSeconds(rand () % (work_time) + 100);
 	timer->trigger = true;	
 }

@@ -29,12 +29,22 @@ void IOTApplication::Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_addre
 		m_nPackets = nPackets;
 		m_dataRate = dataRate;
 		m_env_port = 5555 + id;
+
+		m_p2p.SetDeviceAttribute ("DataRate", StringValue ("500Kbps"));
+		m_p2p.SetChannelAttribute ("Delay", StringValue ("5ms"));
+		
 }
 
 void IOTApplication::DoDispose (void)
 {
 	NS_LOG_FUNCTION_NOARGS ();
 	Application::DoDispose ();
+}
+
+void IOTApplication::SetTracing(std::string file)
+{
+	AsciiTraceHelper ascii;
+    m_p2p.EnablePcapAll (file, false);
 }
 
 void IOTApplication::StartApplication ()

@@ -16,6 +16,7 @@
 #include "ns3/node-container.h"
 #include "ns3/sixlowpan-module.h"
 #include <ns3/lr-wpan-module.h>
+
 #include "env.h"
 
 using namespace ns3;
@@ -63,6 +64,7 @@ extern uint16_t number_of_bots, number_of_clients, number_of_iot;
 extern int16_t reward_tp, reward_fp, reward_tn, reward_fn;
 extern uint32_t botnet_attack_start;
 extern uint32_t botnet_attack_finish;
+extern bool is_tracing;
 
 void parse();
 void GenerateInterval();
@@ -84,6 +86,7 @@ public:
 	Ptr<OpenGymInterface> env_interface;
 	virtual void PacketFlowConvert() override;
 	virtual void PacketFlowClear() override;
+	void SetTracing(std::string file);
 
 protected:
 	using flow_it = std::vector<struct packets_flow>::iterator;
@@ -112,6 +115,7 @@ private:
 	DataRate        m_dataRate;
 	uint32_t        m_packetsSent;
 	uint16_t 		m_env_port;
+	PointToPointHelper m_p2p;
 
 	Ptr<IotEnv> 	m_env;	
 	std::vector<packets_flow> vector_packet_flow;	

@@ -37,6 +37,8 @@
 #include "ns3/object.h"
 #include "ns3/wifi-module.h"
 #include "ns3/node-list.h"
+#include "ns3/trace-helper.h"
+#include "ns3/point-to-point-module.h"
 
 #include "env.h"
 

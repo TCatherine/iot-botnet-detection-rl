@@ -6,6 +6,7 @@ using json = nlohmann::json;
 
 static const std::string path_config = "config.json";
 uint16_t number_of_bots, number_of_clients, number_of_iot;
+bool is_tracing = false;
 config clear_traffic;
 config ddos_traffic;
 
@@ -17,6 +18,8 @@ void parse() {
     number_of_bots = general_info.value("Number Bots", 0);
     number_of_iot = general_info.value("Number Agents", 0);
     number_of_clients = general_info.value("Number Clients", 0);
+
+    is_tracing = general_info.value("IsTracing", 0);
 
     reward_tp = general_info["Reward"].value("TP", 0);
     reward_tn = general_info["Reward"].value("TN", 0);

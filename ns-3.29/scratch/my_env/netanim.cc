@@ -47,7 +47,7 @@ void Animation (
 				anim.UpdateNodeSize(idx, 3, 3);
 		}
 	
-		anim.EnablePacketMetadata (true);
+		anim.EnablePacketMetadata(true);
 
 		ns3::AnimationInterface::SetConstantPosition(routerNode.Get(0), 20, 10);
 		//anim.UpdateNodeImage(0, pictureGate);
