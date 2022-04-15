@@ -86,7 +86,6 @@ public:
 	Ptr<OpenGymInterface> env_interface;
 	virtual void PacketFlowConvert() override;
 	virtual void PacketFlowClear() override;
-	void SetTracing(std::string file);
 
 protected:
 	using flow_it = std::vector<struct packets_flow>::iterator;
@@ -115,7 +114,6 @@ private:
 	DataRate        m_dataRate;
 	uint32_t        m_packetsSent;
 	uint16_t 		m_env_port;
-	PointToPointHelper m_p2p;
 
 	Ptr<IotEnv> 	m_env;	
 	std::vector<packets_flow> vector_packet_flow;	

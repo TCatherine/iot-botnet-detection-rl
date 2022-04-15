@@ -36,15 +36,17 @@
 using namespace ns3;
 using namespace std;
 
-uint8_t* is_attack = nullptr;
+bool* is_attack = nullptr;
 
 NS_LOG_COMPONENT_DEFINE ("Server_App");
 
-Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Node> router) {
+Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Node> router, bool is_iot = false) {
 	CsmaHelper csma;
     csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   	csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
   	csma.SetDeviceAttribute ("Mtu", UintegerValue (1500));
+	if (is_tracing && is_iot)
+		csma.EnablePcapAll("pcap");
 
 	Ptr<LrWpanNetDevice> dev0 = CreateObject<LrWpanNetDevice> ();
 	SixLowPanHelper sixlowpan;
@@ -54,7 +56,10 @@ Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Nod
 
 	NodeContainer iot_router_container = NodeContainer(node, router);
 	NetDeviceContainer temp_container = csma.Install(iot_router_container);
+
+	 
 	NetDeviceContainer net_device_container = sixlowpan.Install(temp_container);
+	
 
 	Ipv6InterfaceContainer ipv6_int_container = ipv6.Assign(net_device_container);
 	ipv6_int_container.SetForwarding(1, true);
@@ -66,7 +71,7 @@ Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Nod
 int  main (int argc, char *argv[])
 {
 	parse();
-	is_attack = new uint8_t[number_of_iot];
+	is_attack = new bool[number_of_iot];
 	// botnet_timer_setup();
 
 	GlobalValue::Bind ("SimulatorImplementationType",
@@ -103,15 +108,14 @@ int  main (int argc, char *argv[])
 
 	NS_LOG_INFO ("Create Stack Protocol for IOT");
 	for (uint16_t i = 0; i < number_of_iot; i++, iot_ipv6.NewNetwork()) {
-		Ipv6Address addr = CreateStackProtocol(iotNodes.Get (i), iot_ipv6, routerNode.Get(0));
+		Ipv6Address addr = CreateStackProtocol(iotNodes.Get (i), iot_ipv6, routerNode.Get(0), true);
 
 		addresses.push_back(addr);
 		ports.push_back(TCP_SINK_PORT);
 
 		Ptr<IOTApplication> iot_app = CreateObject<IOTApplication> ();
 		iot_app->Setup (i, iotNodes.Get (i), addr, TCP_SINK_PORT,  1040, 1000, DataRate ("1Mbps"));
-		if (is_tracing)
-			iot_app->SetTracing("Pcap_" + std::to_string(i));
+
 		iotNodes.Get (i)->AddApplication (iot_app);
 		iot_app->SetStartTime (Seconds (1.));
 	}

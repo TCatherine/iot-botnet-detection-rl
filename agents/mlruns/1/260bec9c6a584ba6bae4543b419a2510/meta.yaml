@@ -1,0 +1,15 @@
+artifact_uri: mlruns/1/260bec9c6a584ba6bae4543b419a2510/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: 260bec9c6a584ba6bae4543b419a2510
+run_uuid: 260bec9c6a584ba6bae4543b419a2510
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1650007673120
+status: 1
+tags: []
+user_id: patricia

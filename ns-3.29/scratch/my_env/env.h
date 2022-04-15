@@ -45,7 +45,7 @@
 
 #define MAX_STEP 30000
 
-extern uint8_t *is_attack;
+extern bool *is_attack;
 
 namespace ns3 {
 

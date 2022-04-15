@@ -8,7 +8,7 @@ void Animation (
 
 		mobility.SetPositionAllocator("ns3::GridPositionAllocator",
 									"MinX", DoubleValue(0.0), "MinY", DoubleValue(0.0), 
-									"DeltaX", DoubleValue(5.0), "DeltaY", DoubleValue(10.0),
+									"DeltaX", DoubleValue(10.0), "DeltaY", DoubleValue(10.0),
 									"GridWidth", UintegerValue(5), "LayoutType", StringValue("RowFirst"));
 
 		mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -21,6 +21,7 @@ void Animation (
 		static AnimationInterface anim("DDoSim.xml");
 
 		const std::string sourceDir = "./icons";
+		std::cout << "I'm here!" << std::endl;
 		
 		uint32_t pictureIoT = anim.AddResource(sourceDir + "/iot.png");
 		//uint32_t pictureGate = anim.AddResource(sourceDir + "/gate.png");
@@ -31,20 +32,20 @@ void Animation (
 		uint16_t idx=0;
 		for (uint16_t i = 0; i < number_of_clients; i++, idx++){
 			anim.UpdateNodeImage(idx, pictureClient);
-			anim.UpdateNodeSize(idx, 3, 3);
+			anim.UpdateNodeSize(idx, 2, 4);
 		}
 
-		anim.UpdateNodeSize(idx, 5, 5);
+		anim.UpdateNodeSize(idx, 3, 5);
 		anim.UpdateNodeImage(idx++, pictureRouter);
 
 		for (uint16_t i = 0; i < number_of_iot; i++, idx++){
 				anim.UpdateNodeImage(idx, pictureIoT);
-				anim.UpdateNodeSize(idx, 3, 3);
+				anim.UpdateNodeSize(idx, 2, 4);
 		}
 
 		for (uint16_t i = 0; i < number_of_bots; i++, idx++){
 				anim.UpdateNodeImage(idx, pictureBot);
-				anim.UpdateNodeSize(idx, 3, 3);
+				anim.UpdateNodeSize(idx, 2, 4);
 		}
 	
 		anim.EnablePacketMetadata(true);
@@ -53,12 +54,12 @@ void Animation (
 		//anim.UpdateNodeImage(0, pictureGate);
 		uint32_t x_pos = 0;
 		for (int l = 0; l < number_of_bots; ++l){
-			ns3::AnimationInterface::SetConstantPosition(botNodes.Get(l), x_pos+=3, 30);
+			ns3::AnimationInterface::SetConstantPosition(botNodes.Get(l), x_pos+=5, 30);
 		}
 		for (int l = 0; l < number_of_iot; ++l){
-			ns3::AnimationInterface::SetConstantPosition(iotNodes.Get(l), 30+3*l, 10+3*l);
+			ns3::AnimationInterface::SetConstantPosition(iotNodes.Get(l), 50+4*l, 10+4*l);
 		}
 		for (int l = 0; l < number_of_clients; ++l) {
-			ns3::AnimationInterface::SetConstantPosition(clientNodes.Get(l), 0, 3*l);
+			ns3::AnimationInterface::SetConstantPosition(clientNodes.Get(l), 0, 5*l);
 		}
 }

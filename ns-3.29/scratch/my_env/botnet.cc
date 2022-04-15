@@ -13,11 +13,11 @@ void botnet_timer_setup() {
 	if (timer->trigger)
 		return;
 
-	uint16_t delay = rand() % 30000 + 20000;
-	uint16_t work_time = rand() % 30000 + 10000;
+	uint16_t delay = rand() % 60 + 100;
+	uint16_t work_time = rand() % 60 + 100;
 	timer->start = Seconds(delay) + Simulator::Now();
 	timer->finish = Seconds(work_time) + timer->start;
-	timer->interval = MilliSeconds(rand () % (work_time) + 100);
+	timer->interval = MilliSeconds(rand () % 100);
 	timer->trigger = true;	
 }
 
@@ -54,7 +54,10 @@ void BotApplication::Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_addre
 		m_packetSize = ddos_traffic.packet_size[idx_ps];
 
 		botnet_timer_setup();
-		SetStartTime(timer->start);
+		for (uint8_t i = 0; i < number_of_iot; i++)
+			is_attack[i] = 0;
+
+		SetStartTime(MilliSeconds(0));
 		std::cout << "[Bot " << m_id << "]  Setup" << std::endl;
 		}
 
@@ -77,9 +80,9 @@ void BotApplication::Schedule() {
 	// std::cout << "Sim: " << Simulator::Now() << " Start: " << timer->start << " End: " << timer->finish << std::endl;
 	if (timer->finish >= Simulator::Now() && timer->start <= Simulator::Now()) {
 		timer->trigger = false;
-		Send();
 		for (uint8_t i = 0; i < number_of_iot; i++)
 			is_attack[i] = 1;
+		Send();
 		Simulator::Schedule (timer->interval, &BotApplication::Schedule, this);
 	}
 	else {

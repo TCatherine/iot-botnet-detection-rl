@@ -27,3 +27,6 @@ cd agent
 ./python main.py
 
 docker build -t project .
+
+ mlflow ui
+

@@ -31,7 +31,7 @@ void ClientApplication::Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_ad
 		m_nPackets = clear_traffic.n_packets[idx_np];
 		m_packetSize = clear_traffic.packet_size[idx_ps];
 
-		SetStartTime(MilliSeconds(500));
+		SetStartTime(MilliSeconds(0));
 
 		std::cout << "[Client " << m_id << "]  Setup: " << m_local_address << ":" << m_local_port << " " << m_interval << std::endl;
 }

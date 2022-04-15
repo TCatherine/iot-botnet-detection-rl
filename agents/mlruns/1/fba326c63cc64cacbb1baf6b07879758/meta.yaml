@@ -1,0 +1,15 @@
+artifact_uri: mlruns/1/fba326c63cc64cacbb1baf6b07879758/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: fba326c63cc64cacbb1baf6b07879758
+run_uuid: fba326c63cc64cacbb1baf6b07879758
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1650013716162
+status: 1
+tags: []
+user_id: patricia

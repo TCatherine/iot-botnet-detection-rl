@@ -28,10 +28,11 @@ def main_loop(env, agent, steps=101):
     agent.policy.save_onnx(path = 'model.onnx')
     obs = env.reset()
     for itr in range(steps):
+        obs = ([] if obs == None else obs)
         action = agent.select_action(list(obs))
         next_obs, reward, done, info = env.step(action)
-        obs = list(next_obs)
-        loss = agent.train(action, reward, list(next_obs))
+        obs = (list(next_obs) if next_obs != None else [])
+        loss = agent.train(action, reward, obs)
 
         agent.add_metrics(info)
         if agent.is_enable_com:
@@ -73,7 +74,7 @@ def single_thread_pipeline(num_agent, linker, conf):
         main_loop(env, agent)
 
 if __name__ == "__main__":
-    config_path = "config.json"
+    config_path = "../config.json"
     conf = Configuretion(config_path)
 
     init_mlflow(conf.experiment_name)

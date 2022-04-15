@@ -23,10 +23,10 @@ class SimplePolicyArchitecture(nn.Module):
         self.pool1 = nn.MaxPool1d(kernel_size=4, stride=4)
         # self.con2 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=2, stride=2)
         # self.fun2 = nn.LeakyReLU()
-        self.drop2 = nn.Dropout()
+
 
         self.fully_connected = nn.Sequential(nn.Linear(32, 64), nn.LeakyReLU())
-
+        self.drop2 = nn.Dropout()
         self.last_layer = nn.Linear(64, 2)
         self.load_model(self.path)
 
@@ -40,7 +40,9 @@ class SimplePolicyArchitecture(nn.Module):
         res6 = torch.mean(res3, 2)
 
         full_conncection = self.fully_connected(res6)
+        drop = self.drop2(full_conncection)
         last_layer = self.last_layer(full_conncection)
+
         result = last_layer.reshape(-1)
         return result
 
