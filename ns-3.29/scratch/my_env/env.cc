@@ -13,7 +13,7 @@ namespace ns3 {
   IotEnv::IotEnv ()
   {
     NS_LOG_FUNCTION (this);
-    m_interval = Seconds(30);
+    m_interval = Seconds(60);
     cur_reward = 0;
     fp = 0;
     fn = 0;
@@ -170,7 +170,7 @@ namespace ns3 {
     fn = 0;
     tp = 0;
     tn = 0;
-    std:: cout << "is attack: " << is_attack[m_agentId] << std::endl;
+
     if (is_attack[m_agentId] && pred_anomaly) {
         tn = 1;
         cur_reward = reward_tn;

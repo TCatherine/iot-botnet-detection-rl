@@ -49,8 +49,8 @@ Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Nod
 		csma.EnablePcapAll("pcap");
 
 	Ptr<LrWpanNetDevice> dev0 = CreateObject<LrWpanNetDevice> ();
-	SixLowPanHelper sixlowpan;
-	sixlowpan.SetDeviceAttribute ("ForceEtherType", BooleanValue (true) );
+	// SixLowPanHelper sixlowpan;
+	// sixlowpan.SetDeviceAttribute ("ForceEtherType", BooleanValue (true) );
 
 	node->AddDevice(dev0);
 
@@ -58,10 +58,10 @@ Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Nod
 	NetDeviceContainer temp_container = csma.Install(iot_router_container);
 
 	 
-	NetDeviceContainer net_device_container = sixlowpan.Install(temp_container);
+	// NetDeviceContainer net_device_container = sixlowpan.Install(temp_container);
 	
 
-	Ipv6InterfaceContainer ipv6_int_container = ipv6.Assign(net_device_container);
+	Ipv6InterfaceContainer ipv6_int_container = ipv6.Assign(temp_container);
 	ipv6_int_container.SetForwarding(1, true);
 	ipv6_int_container.SetDefaultRouteInAllNodes(1);
 
@@ -98,10 +98,10 @@ int  main (int argc, char *argv[])
     stack.Install(botNodes);
 
 	NS_LOG_INFO ("Ipv6AddressHelper init");
-	Ipv6AddressHelper iot_ipv6;
-	Ipv6AddressHelper external_ipv6;
+	Ipv6AddressHelper iot_ipv6, client_ipv6, bot_ipv6;
 	iot_ipv6.SetBase(Ipv6Address ("2001:1::"), Ipv6Prefix (64));
-	external_ipv6.SetBase(Ipv6Address ("2001:2::"), Ipv6Prefix (64));
+	client_ipv6.SetBase(Ipv6Address ("2001:2::"), Ipv6Prefix (64));
+	bot_ipv6.SetBase(Ipv6Address ("2001:2::"), Ipv6Prefix (64));
 
 	std::vector<Ipv6Address> addresses;
 	std::vector<uint16_t> ports;
@@ -121,8 +121,8 @@ int  main (int argc, char *argv[])
 	}
 
 	NS_LOG_INFO ("Create Stack Protocol for Clients");
-	for (uint16_t i = 0; i < number_of_clients; i++, external_ipv6.NewNetwork ()) {
-		Ipv6Address addr = CreateStackProtocol(clientNodes.Get(i), external_ipv6, routerNode.Get(0));
+	for (uint16_t i = 0; i < number_of_clients; i++, client_ipv6.NewNetwork ()) {
+		Ipv6Address addr = CreateStackProtocol(clientNodes.Get(i), client_ipv6, routerNode.Get(0));
 
 		Ptr<ClientApplication> app = CreateObject<ClientApplication> ();
 		app->Setup (i, clientNodes.Get (i), addr, 
@@ -132,8 +132,8 @@ int  main (int argc, char *argv[])
 	}
 
 	NS_LOG_INFO ("Create Stack Protocol for Bots");
-	for (uint16_t i = 0; i < number_of_bots; i++, external_ipv6.NewNetwork ()) {
-		Ipv6Address addr = CreateStackProtocol(botNodes.Get(i), external_ipv6, routerNode.Get(0));
+	for (uint16_t i = 0; i < number_of_bots; i++, bot_ipv6.NewNetwork ()) {
+		Ipv6Address addr = CreateStackProtocol(botNodes.Get(i), bot_ipv6, routerNode.Get(0));
 
 		Ptr<BotApplication> app = CreateObject<BotApplication> ();
 		app->Setup (i, botNodes.Get (i), addr, TCP_SINK_PORT, addresses, ports);

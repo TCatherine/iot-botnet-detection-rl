@@ -17,6 +17,12 @@
 #include "ns3/sixlowpan-module.h"
 #include <ns3/lr-wpan-module.h>
 
+#include "ns3/csma-module.h"
+#include "ns3/internet-apps-module.h"
+#include "ns3/ipv6-static-routing-helper.h"
+
+#include "ns3/ipv6-routing-table-entry.h"
+
 #include "env.h"
 
 using namespace ns3;

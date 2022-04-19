@@ -24,7 +24,7 @@ class Configuretion:
         self.experiment_name += (f'-with-communicat{1 if self.is_feature else 0}' if self.is_enable_communication else '')
 
 
-def main_loop(env, agent, steps=101):
+def main_loop(env, agent, steps=1001):
     agent.policy.save_onnx(path = 'model.onnx')
     obs = env.reset()
     for itr in range(steps):
@@ -42,7 +42,8 @@ def main_loop(env, agent, steps=101):
             print('[Agent {}] Step {} Loss: {} Reward: {}({})' .format(agent.id, itr+1, loss, agent.reward, agent.total_reward))
             mlflow.log_metric(f"loss {agent.id}", loss.tolist())
             mlflow.log_metric(f"reward {agent.id}", agent.total_reward)
-            if itr and itr % 10 == 0:
+            if itr and itr % 50 == 0:
+                agent.eps -= 0.2 if agent.eps > 0 else 0
                 mlflow.log_metric(f"false positive {agent.id}", agent.fp)
                 mlflow.log_metric(f"false negative {agent.id}", agent.fn)
                 mlflow.log_metric(f"true positive {agent.id}", agent.tp)

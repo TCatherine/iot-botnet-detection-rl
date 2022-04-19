@@ -8,8 +8,8 @@ class Agent:
         self.Q_value = None
         self.last_action = [0, 0]
 
-        self.gamma = 0.5
-        self.eps = 0.0001
+        self.gamma = 0.0001
+        self.eps = 0.8
 
         self.id = id
         self.port = port

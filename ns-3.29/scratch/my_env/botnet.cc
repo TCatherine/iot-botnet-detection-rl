@@ -57,7 +57,7 @@ void BotApplication::Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_addre
 		for (uint8_t i = 0; i < number_of_iot; i++)
 			is_attack[i] = 0;
 
-		SetStartTime(MilliSeconds(0));
+		// SetStartTime(MilliSeconds(0));
 		std::cout << "[Bot " << m_id << "]  Setup" << std::endl;
 		}
 
