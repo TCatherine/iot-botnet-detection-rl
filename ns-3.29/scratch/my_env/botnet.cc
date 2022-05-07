@@ -4,6 +4,17 @@ NS_LOG_COMPONENT_DEFINE ("Botnet_App");
 
 botnet_timer* timer = nullptr;
 
+struct time_parameters {
+	uint16_t max_interval_ms = 60;
+	uint16_t min_interval_ms = 10;
+	uint16_t max_delay_s = 120;
+	uint16_t min_delay_s = 60;
+	uint16_t max_work_time_s = 60;
+	uint16_t min_work_time_s = 30;
+};
+
+time_parameters p;
+
 void botnet_timer_setup() {
 	if (timer == nullptr) {
 		timer = new botnet_timer;
@@ -13,11 +24,11 @@ void botnet_timer_setup() {
 	if (timer->trigger)
 		return;
 
-	uint16_t delay = rand() % 60 + 100;
-	uint16_t work_time = rand() % 60 + 100;
+	uint16_t delay = rand() % p.max_delay_s + p.min_delay_s;
+	uint16_t work_time = rand() % p.max_work_time_s + p.min_work_time_s;
 	timer->start = Seconds(delay) + Simulator::Now();
 	timer->finish = Seconds(work_time) + timer->start;
-	timer->interval = MilliSeconds(rand () % 100);
+	timer->interval = MilliSeconds(rand () % p.max_interval_ms + p.min_interval_ms);
 	timer->trigger = true;	
 }
 
@@ -79,6 +90,10 @@ void BotApplication::StartApplication (void)
 void BotApplication::Schedule() {
 	// std::cout << "Sim: " << Simulator::Now() << " Start: " << timer->start << " End: " << timer->finish << std::endl;
 	if (timer->finish >= Simulator::Now() && timer->start <= Simulator::Now()) {
+		// if (is_start) {
+		// 	std::cout << "Bot " << m_id << " Application Start" << std::endl;
+		// }
+		is_start = false;
 		timer->trigger = false;
 		for (uint8_t i = 0; i < number_of_iot; i++)
 			is_attack[i] = 1;
@@ -86,8 +101,9 @@ void BotApplication::Schedule() {
 		Simulator::Schedule (timer->interval, &BotApplication::Schedule, this);
 	}
 	else {
+		is_start = true;
 		botnet_timer_setup();
-		std::cout << "Bot " << m_id << " Application Pause [ " << timer->start.GetMilliSeconds() << " millisec ]" << std::endl;
+		// std::cout << "Bot " << m_id << " Application Pause [ " << timer->start.GetMilliSeconds() << " millisec ]" << std::endl;
 		Simulator::Schedule (timer->start - Simulator::Now(), &BotApplication::Schedule, this);
 	}
 }
@@ -120,8 +136,8 @@ void BotApplication::Send() {
 
 		m_socket->Connect (remote);
 		m_socket->SendTo(p, 0, remote);
-		std::cout << "Bot " << m_id << " -> IOT " << i << " [ delta = " 
-			<< timer->interval.GetMilliSeconds() << " millisec ]" << std::endl; 
+		// std::cout << "Bot " << m_id << " -> IOT " << i << " [ delta = " 
+		// 	<< timer->interval.GetMilliSeconds() << " millisec ]" << std::endl; 
 	}
 }
 

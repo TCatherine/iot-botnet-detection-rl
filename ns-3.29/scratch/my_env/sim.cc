@@ -45,8 +45,11 @@ Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Nod
     csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   	csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
   	csma.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-	if (is_tracing && is_iot)
+	if (is_tracing && is_iot) {
+		AsciiTraceHelper ascii;
+  		csma.EnableAsciiAll (ascii.CreateFileStream ("pcap.tr"));
 		csma.EnablePcapAll("pcap");
+	}
 
 	Ptr<LrWpanNetDevice> dev0 = CreateObject<LrWpanNetDevice> ();
 	// SixLowPanHelper sixlowpan;
@@ -70,6 +73,17 @@ Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Nod
 
 int  main (int argc, char *argv[])
 {
+    CommandLine cmd;
+    cmd.Parse (argc, argv);
+
+	int iot_port = 5555;
+	if (argc > 1) {
+		std::string s_port = argv[1];
+		iot_port = std::stoi(s_port);
+	}
+
+	srand (time(NULL) + iot_port);
+
 	parse();
 	is_attack = new bool[number_of_iot];
 	// botnet_timer_setup();
@@ -101,7 +115,7 @@ int  main (int argc, char *argv[])
 	Ipv6AddressHelper iot_ipv6, client_ipv6, bot_ipv6;
 	iot_ipv6.SetBase(Ipv6Address ("2001:1::"), Ipv6Prefix (64));
 	client_ipv6.SetBase(Ipv6Address ("2001:2::"), Ipv6Prefix (64));
-	bot_ipv6.SetBase(Ipv6Address ("2001:2::"), Ipv6Prefix (64));
+	bot_ipv6.SetBase(Ipv6Address ("2001:3::"), Ipv6Prefix (64));
 
 	std::vector<Ipv6Address> addresses;
 	std::vector<uint16_t> ports;
@@ -114,7 +128,7 @@ int  main (int argc, char *argv[])
 		ports.push_back(TCP_SINK_PORT);
 
 		Ptr<IOTApplication> iot_app = CreateObject<IOTApplication> ();
-		iot_app->Setup (i, iotNodes.Get (i), addr, TCP_SINK_PORT,  1040, 1000, DataRate ("1Mbps"));
+		iot_app->Setup (i, iot_port, iotNodes.Get (i), addr, TCP_SINK_PORT,  1040, 1000, DataRate ("1Mbps"));
 
 		iotNodes.Get (i)->AddApplication (iot_app);
 		iot_app->SetStartTime (Seconds (1.));

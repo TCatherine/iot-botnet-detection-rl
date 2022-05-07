@@ -18,23 +18,23 @@ ClientApplication::~ClientApplication()
 void ClientApplication::Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_address, 
 	uint16_t local_port, std::vector<Ipv6Address>& remote_address, 
 	std::vector<uint16_t>& remote_port)  {
-		m_id = id;
-		m_node = node;
-		m_socket = Socket::CreateSocket (node, UdpSocketFactory::GetTypeId ());
-		m_local_address = local_address;
-		m_local_port = local_port;
-		m_remote_address = remote_address;
-		m_remote_port = remote_port;
+	m_id = id;
+	m_node = node;
+	m_socket = Socket::CreateSocket (node, UdpSocketFactory::GetTypeId ());
+	m_local_address = local_address;
+	m_local_port = local_port;
+	m_remote_address = remote_address;
+	m_remote_port = remote_port;
 
-		uint8_t idx_np = rand() % clear_traffic.n_packets.size();
-		uint8_t idx_ps = rand() % clear_traffic.packet_size.size();
-		m_nPackets = clear_traffic.n_packets[idx_np];
-		m_packetSize = clear_traffic.packet_size[idx_ps];
-		time_finish = Seconds(50);
+	uint8_t idx_np = rand() % clear_traffic.n_packets.size();
+	uint8_t idx_ps = rand() % clear_traffic.packet_size.size();
+	m_nPackets = clear_traffic.n_packets[idx_np];
+	m_packetSize = clear_traffic.packet_size[idx_ps];
+	time_finish = Seconds(50);
 
-		// SetStartTime(MilliSeconds(5));
+	// SetStartTime(MilliSeconds(5));
 
-		std::cout << "[Client " << m_id << "]  Setup: " << m_local_address << ":" << m_local_port << " " << m_interval << std::endl;
+	std::cout << "[Client " << m_id << "]  Setup: " << m_local_address << ":" << m_local_port << " " << m_interval << std::endl;
 }
 
 void ClientApplication::DoDispose (void)
@@ -60,17 +60,22 @@ void ClientApplication::StartApplication (void)
 
 void ClientApplication::Schedule() {
 	if (time_finish > Simulator::Now()) {
-		m_interval = MilliSeconds(rand () % (30 * 200) + 100);
+		// if (is_start) {
+		// 	std::cout << "Client Application Start" << std::endl;
+		// }
+		is_start = false;
+		m_interval = Seconds(rand () % max_interval_s + min_interval_s);
 		Send();
 		Simulator::Schedule (m_interval, &ClientApplication::Schedule, this);
 	}
 	else {
-		uint16_t delay = rand() % 300;
-		uint16_t work_time = rand() % 300 + 1;
-		time_start = Seconds(delay) + Seconds(10);
+		is_start = true;
+		uint16_t delay = rand() % max_delay_s + min_delay_s;
+		uint16_t work_time = rand() % max_work_time_s + min_work_time_s;
+		time_start = Seconds(delay);
 		time_finish = Seconds(work_time) + time_start + Simulator::Now();
-		m_interval = MilliSeconds(rand () % (work_time * 200) + 100);
-		std::cout << "Client Application Pause [ " << time_start.GetMilliSeconds() << " millisec ]" << std::endl;
+		m_interval = MilliSeconds(rand () % max_interval_s + min_interval_s);
+		// std::cout << "Client Application Pause [ " << time_start.GetSeconds() << " s ]" << std::endl;
 		Simulator::Schedule (time_start, &ClientApplication::Schedule, this);
 	}
 }
@@ -103,15 +108,15 @@ void ClientApplication::Send() {
 
 	m_socket->Connect (remote);
 	m_socket->SendTo(p, 0, remote);
-	std::cout << "Client " << m_id << " -> IOT " << i << " [ delta = " 
-		<< m_interval.GetMilliSeconds() << " millisec ]" << std::endl; 
+	// std::cout << "Client " << m_id << " -> IOT " << i << " [ delta = " 
+	// 	<< m_interval.GetMilliSeconds() << " millisec ]" << std::endl; 
 }
 
 void ClientApplication::StopApplication ()
 {
 	NS_LOG_FUNCTION_NOARGS ();
 
-	std::cout << "[Client " << m_id << "] Stop Application" << std::endl;
+	// std::cout << "[Client " << m_id << "] Stop Application" << std::endl;
 	m_socket->Close();
 }
 

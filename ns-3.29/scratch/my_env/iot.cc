@@ -18,7 +18,7 @@ IOTApplication::~IOTApplication()
 	m_socket = 0;
 }
 
-void IOTApplication::Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_address, 
+void IOTApplication::Setup (uint16_t id, uint16_t iot_port, Ptr<Node> node, Ipv6Address local_address, 
 	uint16_t local_port, uint32_t packetSize, uint32_t nPackets, DataRate dataRate){
 		m_id = id;
 		m_socket = Socket::CreateSocket (node, UdpSocketFactory::GetTypeId ());
@@ -28,7 +28,7 @@ void IOTApplication::Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_addre
 		m_packetSize = packetSize;
 		m_nPackets = nPackets;
 		m_dataRate = dataRate;
-		m_env_port = 5555 + id;		
+		m_env_port = iot_port + id;		
 }
 
 void IOTApplication::DoDispose (void)
@@ -47,7 +47,7 @@ void IOTApplication::StartApplication ()
 	m_socket->SetRecvCallback (MakeCallback (&IOTApplication::HandleRead, this));
 	m_socket->SetSendCallback (MakeCallback(&IOTApplication::HandleSend, this));
 
-	m_env = CreateObject<IotEnv> (m_id, Seconds(13));
+	m_env = CreateObject<IotEnv> (m_id, Seconds(20));
 	Ptr<OpenGymInterface> openGymInterface = CreateObject<OpenGymInterface> (m_env_port);
 	m_env->SetOpenGymInterface(openGymInterface);
 	m_env->m_application = this;

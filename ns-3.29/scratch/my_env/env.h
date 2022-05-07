@@ -93,9 +93,7 @@ namespace ns3 {
 
   private:
     void ScheduleNextStateRead();
-    uint16_t Epsilon_Greedy(std::vector<int> action);
     float cur_reward;
-    float eps = 0.05;
     uint32_t m_agentId;
     uint32_t fp, fn, tp, tn;
     Time m_interval;

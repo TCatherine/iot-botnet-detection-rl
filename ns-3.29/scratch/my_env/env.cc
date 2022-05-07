@@ -13,7 +13,7 @@ namespace ns3 {
   IotEnv::IotEnv ()
   {
     NS_LOG_FUNCTION (this);
-    m_interval = Seconds(60);
+    m_interval = Seconds(20);
     cur_reward = 0;
     fp = 0;
     fn = 0;
@@ -25,7 +25,6 @@ namespace ns3 {
   IotEnv::IotEnv (uint32_t agentId, Time stepTime)
   {
     NS_LOG_FUNCTION (this);
-    m_interval = Seconds(60);
     m_agentId = agentId;
     m_interval = stepTime;
     cur_reward = 0;
@@ -41,6 +40,7 @@ namespace ns3 {
   IotEnv::ScheduleNextStateRead ()
   {
     NS_LOG_FUNCTION (this);
+    zmq_sleep(1);
     Simulator::Schedule (m_interval, &IotEnv::ScheduleNextStateRead, this);
     Notify();
   }
@@ -185,10 +185,10 @@ namespace ns3 {
     }
     else {
       cur_reward = reward_tp;
-      tp = 1;
+      tp = 1; 
     }
 
-    printf("Attack %d Reward: %f\n", is_attack[m_agentId], cur_reward);
+    // printf("Attack %d Reward: %f\n", is_attack[m_agentId], cur_reward);
     m_application->PacketFlowClear();
     return true;
   }

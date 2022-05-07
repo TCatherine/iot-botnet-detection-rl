@@ -86,7 +86,7 @@ class IOTApplication : public IApplicationBase, public Application
 public:
 	IOTApplication();
 	virtual ~IOTApplication ();
-	void Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_address, 
+	void Setup (uint16_t id, uint16_t iot_port, Ptr<Node> node, Ipv6Address local_address, 
 	uint16_t local_port, uint32_t packetSize, uint32_t nPackets, DataRate dataRate);
 
 	Ptr<OpenGymInterface> env_interface;
@@ -132,7 +132,6 @@ class BotApplication : public Application
 		void Setup (uint16_t id, Ptr<Node> socket, Ipv6Address local_address, uint16_t local_port, 
 			std::vector<Ipv6Address>& remote_address, std::vector<uint16_t>& remote_port);
 		
-		//BotApplication (Ptr<Node> node, Ipv4Address address, uint16_t port);
 		virtual ~BotApplication ();
 
 	protected:
@@ -152,7 +151,6 @@ class BotApplication : public Application
 		Ptr <Socket>    m_socket;
 		Ptr <Node> 		m_node; 
 		Ptr <Node> 		server_node;
-	//Address         m_peer;
 		Ipv6Address 	m_local_address;
 		uint16_t		m_local_port;
 		uint32_t        m_packetSize;
@@ -160,6 +158,7 @@ class BotApplication : public Application
 		DataRate        m_dataRate;
 		uint32_t        m_packetsSent;
 		uint16_t 		m_env_port;
+		bool			is_start = false;
 
 		botnet_timer* 				m_timer;
 		std::vector<Ipv6Address>	m_remote_address;
@@ -172,6 +171,14 @@ class ClientApplication : public Application
 		ClientApplication();
 		void Setup (uint16_t id, Ptr<Node> node, Ipv6Address local_address, uint16_t local_port, 
 			std::vector<Ipv6Address>& remote_address, std::vector<uint16_t>& remote_port);
+
+		uint16_t max_interval_s = 20;
+		uint16_t min_interval_s = 3;
+		uint16_t max_delay_s = 50;
+		uint16_t min_delay_s = 10;
+		uint16_t max_work_time_s = 50;
+		uint16_t min_work_time_s = 10;
+
 		
 		virtual ~ClientApplication ();
 	protected:
@@ -201,6 +208,7 @@ class ClientApplication : public Application
 		Time			m_interval;
 		Time 			time_start;
 		Time 			time_finish; 
+		bool			is_start = false;
 
 		std::vector<Ipv6Address>	m_remote_address;
 		std::vector<uint16_t>		m_remote_port;

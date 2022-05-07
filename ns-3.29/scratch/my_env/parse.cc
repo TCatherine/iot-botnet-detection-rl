@@ -20,7 +20,6 @@ void parse() {
     number_of_clients = general_info.value("Number Clients", 0);
 
     is_tracing = general_info.value("IsTracing", 0);
-    std::cout << general_info.value("IsTracing", 0) << std::endl;
     std::cout << is_tracing << std::endl;
 
     reward_tp = general_info["Reward"].value("TP", 0);

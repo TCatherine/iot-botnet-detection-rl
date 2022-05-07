@@ -28,6 +28,7 @@ class SimplePolicyArchitecture(nn.Module):
         self.fully_connected = nn.Sequential(nn.Linear(32, 64), nn.LeakyReLU())
         self.drop2 = nn.Dropout()
         self.last_layer = nn.Linear(64, 2)
+        self.fun2 = nn.LeakyReLU()
         self.load_model(self.path)
 
     def forward(self, objects, com_data = None):
@@ -41,9 +42,10 @@ class SimplePolicyArchitecture(nn.Module):
 
         full_conncection = self.fully_connected(res6)
         drop = self.drop2(full_conncection)
-        last_layer = self.last_layer(full_conncection)
+        last_layer = self.last_layer(drop)
+        pos_values = self.fun2(last_layer)
 
-        result = last_layer.reshape(-1)
+        result = pos_values.reshape(-1, 2)
         return result
 
     def save_model(self, path):
@@ -88,12 +90,13 @@ class CommunicationPolicyArchitecture(nn.Module):
         self.drop1 = nn.Dropout()
         self.pool1 = nn.MaxPool1d(kernel_size=4, stride=4)
         # self.con2 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=2, stride=2)
-        # self.fun2 = nn.LeakyReLU()
-        self.drop2 = nn.Dropout()
+        self.fun2 = nn.LeakyReLU()
+
 
         self.fully_connected = nn.Sequential(nn.Linear(32, 64), nn.LeakyReLU())
-
+        self.drop2 = nn.Dropout()
         self.last_layer = (nn.Linear(64, 3) if self.is_feature else nn.Linear(64, 2))
+        self.fun2 = nn.LeakyReLU()
 
         self.load_model(self.path)
 
@@ -107,8 +110,11 @@ class CommunicationPolicyArchitecture(nn.Module):
         res6 = torch.mean(res3, 2)
 
         full_conncection = self.fully_connected(res6)
-        last_layer = self.last_layer(full_conncection)
-        result = last_layer.reshape(-1)
+        drop = self.drop2(full_conncection)
+        last_layer = self.last_layer(drop)
+        pos_values = self.fun2(last_layer)
+
+        result = pos_values.reshape(-1)
         return result
 
     def save_model(self, path):
