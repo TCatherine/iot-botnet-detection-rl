@@ -47,7 +47,7 @@ void IOTApplication::StartApplication ()
 	m_socket->SetRecvCallback (MakeCallback (&IOTApplication::HandleRead, this));
 	m_socket->SetSendCallback (MakeCallback(&IOTApplication::HandleSend, this));
 
-	m_env = CreateObject<IotEnv> (m_id, Seconds(20));
+	m_env = CreateObject<IotEnv> (m_id, Seconds(30));
 	Ptr<OpenGymInterface> openGymInterface = CreateObject<OpenGymInterface> (m_env_port);
 	m_env->SetOpenGymInterface(openGymInterface);
 	m_env->m_application = this;

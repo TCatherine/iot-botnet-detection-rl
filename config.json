@@ -1,7 +1,7 @@
 {
 "GeneralInfo": {
 	"Number Agents": 3,
-	"Number Env": 5,
+	"Number Env": 1,
 	"Number Clients": 5,
 	"Number Bots": 15,
 	"First Port":5555,

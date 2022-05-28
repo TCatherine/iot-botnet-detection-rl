@@ -4,14 +4,14 @@ import numpy as np
 
 
 class Agent:
-    def __init__(self, number_features, num_agents, is_enable_communication, is_feature, linker, weight_path):
-        self.nagent = num_agents
+    def __init__(self, number_features, num_envs, is_enable_communication, is_feature, linker, weight_path):
+        self.nenvs = num_envs
         self.Q_value = None
-        self.last_action = [[0, 0] for _ in range(self.nagent)]
+        self.last_action = [[0, 0] for _ in range(self.nenvs)]
 
-        self.gamma = 0.0001
-        self.eps = 0.6
-        self.learning_rate = 0.0003
+        self.gamma = 0.0003
+        self.eps = 0.4
+        self.learning_rate = 0.001
 
         self.is_enable_com = is_enable_communication
         self.is_feature = is_feature
@@ -28,8 +28,8 @@ class Agent:
             self.policy = CommunicationPolicyArchitecture(self.number_features, self.max_number_flows,
                                                           weight_path, self.is_feature)
 
-        self.loss = torch.nn.MSELoss()
-        # self.loss = torch.nn.CrossEntropyLoss()
+        # self.loss = torch.nn.MSELoss()
+        self.loss = torch.nn.CrossEntropyLoss(reduction='mean')
         # self.loss = nn.SmoothL1Loss()
         self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self.learning_rate)
 
@@ -38,10 +38,11 @@ class Agent:
     def init_step(self, obs, reward):
         pass
 
-    def epsilon_greedy(self, Q_values):
+    def epsilon_greedy(self, Q_values, is_attack):
         for i, Q_value in enumerate(Q_values):
             if np.random.random() < self.eps:
-                j = np.random.choice([0, 1])
+                # j = np.random.choice([0, 1])
+                j = is_attack[i]
             else:
                 j = int(Q_value.argmax())
                 # print(f'[Agent {self.id}] Choosen action {j} ({Q_value.detach().numpy()})')
@@ -51,11 +52,11 @@ class Agent:
         return self.last_action
 
 
-    def select_action(self, obs):
+    def select_action(self, obs, is_attack):
         self.Q_value = self.predict_Q_value(obs)
         # Q_value = self.Q_value[:2]
 
-        last_action = self.epsilon_greedy(self.Q_value)
+        last_action = self.epsilon_greedy(self.Q_value, is_attack)
         return last_action
 
     def predict_Q_value(self, obs):
@@ -78,13 +79,6 @@ class Agent:
 
         return result
 
-    def add_metrics(self, string):
-        for str in string:
-            words = str.split(' ')
-            self.fp += int(words[1])
-            self.fn += int(words[3])
-            self.tp += int(words[5])
-            self.tn += int(words[7])
 
     def train(self, action, reward, next_obs):
         self.reward = reward
@@ -97,10 +91,11 @@ class Agent:
             target_Q[i][action[i].index(1)]=q_next_max[i]
         target_Q = target_Q.detach()
 
-        loss = self.loss(self.Q_value, target_Q)
+        loss = self.loss(self.Q_value, torch.max(target_Q, 1)[1])
         loss.backward()
         self.optimizer.step()
         return loss
+
 
     def share_knowledge(self):
         if not self.is_enable_com:

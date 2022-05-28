@@ -27,32 +27,49 @@ class Configuretion:
         self.experiment_name += (f'-with-communicat{1 if self.is_feature else 0}' if self.is_enable_communication else '')
 
 
-def main_loop(idx, agent, envs, steps=201):
+def add_metrics(string, fp, fn, tp, tn):
+    for str in string:
+        words = str.split(' ')
+        fp += int(words[3])
+        fn += int(words[5])
+        tp += int(words[7])
+        tn += int(words[9])
+    return fp, fn, tp, tn
 
+def main_loop(idx, agent, envs, steps=201):
+    fp, fn, tp, tn = 0, 0, 0, 0
+    total_reward = 0
+    local_reward = 0
     # agent.policy.save_onnx(path = 'model.onnx')
     obs = envs.reset(idx)
+    is_attack = [0] * agent.nenvs
     for itr in range(steps):
-        action = agent.select_action(list(obs))
+        action = agent.select_action(list(obs), is_attack)
         next_obs, reward, done, info = envs.step(idx, action)
+        is_attack = [(int(i.split(' ')[1])) for i in info]
+        total_reward += sum(reward)
+        local_reward += sum(reward)
 
         loss = agent.train(action, reward, obs)
 
-        agent.add_metrics(info)
+        fp, fn, tp, tn = add_metrics(info, fp, fn, tp, tn)
         if agent.is_enable_com:
             agent.share_knowledge()
 
         if itr and itr % 1 == 0:
-            print('[Agent {}] Step {} Loss: {} Reward: {}({})' .format(idx, itr+1, loss, agent.reward, agent.total_reward))
+            print('[Agent {}] Step {} Loss: {} Reward: {}({})' .format(idx, itr+1, loss, agent.reward, total_reward))
             mlflow.log_metric(f"loss {idx}", loss.tolist())
-            mlflow.log_metric(f"reward {idx}", agent.total_reward)
+            mlflow.log_metric(f"reward {idx}", total_reward)
             if itr and itr % 20 == 0:
                 agent.eps -= 0.05 if agent.eps > 0.05 else 0.05
-                mlflow.log_metric(f"false positive {idx}", agent.fp)
-                mlflow.log_metric(f"false negative {idx}", agent.fn)
-                mlflow.log_metric(f"true positive {idx}", agent.tp)
-                mlflow.log_metric(f"true negative {idx}", agent.tn)
+                mlflow.log_metric(f"local reward {idx}", local_reward)
+                mlflow.log_metric(f"false positive {idx}", fp)
+                mlflow.log_metric(f"false negative {idx}", fn)
+                mlflow.log_metric(f"true positive {idx}", tp)
+                mlflow.log_metric(f"true negative {idx}", tn)
                 agent.policy.save_model(agent.policy.path)
-                agent.fp, agent.fn, agent.tp, agent.tn = 0, 0, 0, 0
+                fp, fn, tp, tn = 0, 0, 0, 0
+                local_reward = 0
 
     envs.close(idx)
 
@@ -77,7 +94,7 @@ if __name__ == "__main__":
     agent = Agent(conf.n_features, conf.num_env, conf.is_enable_communication,
                   conf.is_feature, Communicator(conf.n_features), conf.weight_path)
     envs = EnvStack(conf)
-    time.sleep(5)
+    time.sleep(15)
 
     init_mlflow(conf.experiment_name)
     with mlflow.start_run():

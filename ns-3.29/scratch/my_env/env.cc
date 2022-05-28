@@ -1,6 +1,7 @@
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 #include "ns3/opengym-module.h"
 #include <cstdint>
+
 #include "env.h"
 
 int16_t reward_tp, reward_fp, reward_tn, reward_fn;
@@ -19,6 +20,9 @@ namespace ns3 {
     fn = 0;
     tp = 0;
     tn = 0;
+    dataset_file.open ("example.csv");
+    dataset_file << "№,pack_num,pack_size,ttl,duration,interval,deviation_interval,is_attack" << std::endl;
+    dataset_file << "\n";
     Simulator::Schedule (Seconds(0.0), &IotEnv::ScheduleNextStateRead, this);
   }
 
@@ -32,6 +36,8 @@ namespace ns3 {
     fn = 0;
     tp = 0;
     tn = 0;
+    dataset_file.open ("example.csv");
+    dataset_file << "\n";
 
     Simulator::Schedule (Seconds(0.0), &IotEnv::ScheduleNextStateRead, this);
   }
@@ -48,6 +54,7 @@ namespace ns3 {
   IotEnv::~IotEnv ()
   {
     NS_LOG_FUNCTION (this);
+    dataset_file.close();
   }
 
   TypeId IotEnv::GetTypeId (void) {
@@ -107,6 +114,10 @@ namespace ns3 {
       box->AddValue(vector_features[i].duration);
       box->AddValue(vector_features[i].average_interval);
       box->AddValue(vector_features[i].max_deviation_interval);
+
+      dataset_file << i << "," << vector_features[i].packet_number << ',' << vector_features[i].average_size_packet <<
+      ',' << vector_features[i].average_ttl << ',' << vector_features[i].duration << ',' <<  vector_features[i].average_interval <<
+      ',' << vector_features[i].max_deviation_interval << ',' << *is_attack << std::endl;
     }
     // // Print data
     // //NS_LOG_INFO ("MyGetObservation: " << box);
@@ -151,7 +162,8 @@ namespace ns3 {
   /*Define extra info. Optional*/
   std::string IotEnv::GetExtraInfo()
   {
-    std::string info = "FP " + std::to_string(fp);
+    std::string info = "IsAttack " + std::to_string(*is_attack);
+    info += " FP " + std::to_string(fp);
     info +=  " FN " + std::to_string(fn);
     info +=  " TP " + std::to_string(tp);
     info +=  " TN " + std::to_string(tn);

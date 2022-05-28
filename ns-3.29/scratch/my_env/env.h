@@ -22,12 +22,13 @@
 #ifndef MY_GYM_ENTITY_H
 #define MY_GYM_ENTITY_H
 
-#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 #include "ns3/opengym-module.h"
 #include "ns3/nstime.h"
@@ -97,6 +98,8 @@ namespace ns3 {
     uint32_t m_agentId;
     uint32_t fp, fn, tp, tn;
     Time m_interval;
+    std::string name_file = "dataset.csv";
+    std::ofstream dataset_file;
   };
 
 }

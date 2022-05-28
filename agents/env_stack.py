@@ -23,7 +23,6 @@ def worker(main_e, work_e, env, idx):
             env.close(idx)
         elif cmd == 'step':
             res = env.step(idx, data)
-            print(res[0])
             d = [] if res[0] is None else [*res[0]]
             work_e.send(d)
             work_e.send(res[1])

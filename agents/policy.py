@@ -19,15 +19,17 @@ class SimplePolicyArchitecture(nn.Module):
 
         self.con1 = nn.Conv1d(in_channels=num_feature,  out_channels=32, kernel_size=2, stride=2)
         self.fun1 = nn.LeakyReLU()
-        self.drop1 = nn.Dropout()
+
         self.pool1 = nn.MaxPool1d(kernel_size=4, stride=4)
         # self.con2 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=2, stride=2)
         # self.fun2 = nn.LeakyReLU()
 
 
         self.fully_connected = nn.Sequential(nn.Linear(32, 64), nn.LeakyReLU())
+        self.drop1 = nn.Dropout()
+        self.fully_connected_2 = nn.Sequential(nn.Linear(64, 32), nn.LeakyReLU())
         self.drop2 = nn.Dropout()
-        self.last_layer = nn.Linear(64, 2)
+        self.last_layer = nn.Linear(32, 2)
         self.fun2 = nn.LeakyReLU()
         self.load_model(self.path)
 
@@ -40,9 +42,11 @@ class SimplePolicyArchitecture(nn.Module):
         # res5 = self.fun2(res4)
         res6 = torch.mean(res3, 2)
 
-        full_conncection = self.fully_connected(res6)
-        drop = self.drop2(full_conncection)
-        last_layer = self.last_layer(drop)
+        full_conncection_1 = self.fully_connected(res6)
+        drop1 = self.drop1(full_conncection_1)
+        full_conncection_2 = self.fully_connected_2(drop1)
+        drop2 = self.drop1(full_conncection_2)
+        last_layer = self.last_layer(drop2)
         pos_values = self.fun2(last_layer)
 
         result = pos_values.reshape(-1, 2)
