@@ -90,9 +90,9 @@ void BotApplication::StartApplication (void)
 void BotApplication::Schedule() {
 	// std::cout << "Sim: " << Simulator::Now() << " Start: " << timer->start << " End: " << timer->finish << std::endl;
 	if (timer->finish >= Simulator::Now() && timer->start <= Simulator::Now()) {
-		// if (is_start) {
-		// 	std::cout << "Bot " << m_id << " Application Start" << std::endl;
-		// }
+		if (is_start) {
+			std::cout << "Bot " << m_id << " Application Start" << std::endl;
+		}
 		is_start = false;
 		timer->trigger = false;
 		for (uint8_t i = 0; i < number_of_iot; i++)
@@ -103,7 +103,7 @@ void BotApplication::Schedule() {
 	else {
 		is_start = true;
 		botnet_timer_setup();
-		// std::cout << "Bot " << m_id << " Application Pause [ " << timer->start.GetMilliSeconds() << " millisec ]" << std::endl;
+		std::cout << "Bot " << m_id << " Application Pause [ " << timer->start.GetMilliSeconds() << " millisec ]" << std::endl;
 		Simulator::Schedule (timer->start - Simulator::Now(), &BotApplication::Schedule, this);
 	}
 }

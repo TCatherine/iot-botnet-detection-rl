@@ -10,7 +10,7 @@ class Agent:
         self.last_action = [[0, 0] for _ in range(self.nenvs)]
 
         self.gamma = 0.0003
-        self.eps = 0.4
+        self.eps = 0.6
         self.learning_rate = 0.001
 
         self.is_enable_com = is_enable_communication

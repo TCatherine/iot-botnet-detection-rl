@@ -17,40 +17,44 @@ class SimplePolicyArchitecture(nn.Module):
         self.path = weight_path
 
 
-        self.con1 = nn.Conv1d(in_channels=num_feature,  out_channels=32, kernel_size=2, stride=2)
+        self.con1 = nn.Conv1d(in_channels=num_feature,  out_channels=8, kernel_size=4, stride=2)
         self.fun1 = nn.LeakyReLU()
 
-        self.pool1 = nn.MaxPool1d(kernel_size=4, stride=4)
-        # self.con2 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=2, stride=2)
+        # self.pool1 = nn.MaxPool1d(kernel_size=4, stride=4)
+        # self.con2 = nn.Conv1d(in_channels=8, out_channels=16, kernel_size=4, stride=2)
         # self.fun2 = nn.LeakyReLU()
 
 
-        self.fully_connected = nn.Sequential(nn.Linear(32, 64), nn.LeakyReLU())
+        self.fully_connected = nn.Sequential(nn.Linear(8, 32), nn.LeakyReLU())
         self.drop1 = nn.Dropout()
-        self.fully_connected_2 = nn.Sequential(nn.Linear(64, 32), nn.LeakyReLU())
+        self.fully_connected_2 = nn.Sequential(nn.Linear(32, 8), nn.LeakyReLU())
         self.drop2 = nn.Dropout()
-        self.last_layer = nn.Linear(32, 2)
+        self.last_layer = nn.Linear(8, 2)
         self.fun2 = nn.LeakyReLU()
+
+        self.m = nn.Softmax(dim=1)
         self.load_model(self.path)
 
     def forward(self, objects, com_data = None):
         object = torch.tensor(objects, dtype=torch.float32, device=self.device)
         res1 = self.con1(object)
         res2 = self.fun1(res1)
-        res3 = self.pool1(res2)
-        # res4 = self.con2(res3)
+        # res3 = self.pool1(res2)
+        # res4 = self.con2(res2)
         # res5 = self.fun2(res4)
-        res6 = torch.mean(res3, 2)
+        res6 = torch.mean(res2, 2)
 
         full_conncection_1 = self.fully_connected(res6)
         drop1 = self.drop1(full_conncection_1)
         full_conncection_2 = self.fully_connected_2(drop1)
         drop2 = self.drop1(full_conncection_2)
         last_layer = self.last_layer(drop2)
-        pos_values = self.fun2(last_layer)
+        # pos_values = self.fun2(last_layer)
 
-        result = pos_values.reshape(-1, 2)
-        return result
+        result = last_layer.reshape(-1, 2)
+
+        res = self.m(self.fun2(result))
+        return res
 
     def save_model(self, path):
         with data_lock:

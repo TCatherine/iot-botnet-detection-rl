@@ -60,7 +60,7 @@ def main_loop(idx, agent, envs, steps=201):
             print('[Agent {}] Step {} Loss: {} Reward: {}({})' .format(idx, itr+1, loss, agent.reward, total_reward))
             mlflow.log_metric(f"loss {idx}", loss.tolist())
             mlflow.log_metric(f"reward {idx}", total_reward)
-            if itr and itr % 20 == 0:
+            if itr and itr % 10 == 0:
                 agent.eps -= 0.05 if agent.eps > 0.05 else 0.05
                 mlflow.log_metric(f"local reward {idx}", local_reward)
                 mlflow.log_metric(f"false positive {idx}", fp)

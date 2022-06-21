@@ -99,27 +99,26 @@ void IOTApplication::PacketParse(Ptr<Packet> packet) {
 		new_flow.port = udp_header.GetSourcePort();
 		new_flow.packet_number = 1;
 		new_flow.sum_size_packet = packet->GetSize();
-		new_flow.sum_ttl = ip_header.GetHopLimit();
+		//new_flow.sum_ttl = ip_header.GetHopLimit();
 		new_flow.s_time = Simulator::Now();
 		new_flow.l_time = Simulator::Now();
-		new_flow.l_interval = Seconds(0);
-		new_flow.duration = Seconds(0);
-		new_flow.sum_interval = Seconds(0);
-		new_flow.max_deviation_interval = Seconds(0);
+		new_flow.l_interval = MilliSeconds(30*60); // as interval iot
+		new_flow.duration = MilliSeconds(0);
+		new_flow.sum_interval = MilliSeconds(30*60); // as interval iot
+		new_flow.max_deviation_interval = MilliSeconds(0);
 		vector_packet_flow.push_back(new_flow);
 	}
 	else {
 		i->packet_number += 1;
-		i->sum_size_packet = packet->GetSize();
-		i->sum_ttl += ip_header.GetHopLimit();
+		i->sum_size_packet += packet->GetSize();
+		//i->sum_ttl += ip_header.GetHopLimit();
 		i->sum_interval += Simulator::Now() - i->l_time;
 		i->l_interval = Simulator::Now() - i->l_time;
 		i->duration = Simulator::Now() - i->s_time;
 		i->l_time = Simulator::Now();
-		uint16_t average_interval = GetTime(i->sum_interval);
+		uint16_t average_interval = i->sum_interval.GetMilliSeconds();
 		average_interval /= i->packet_number;
-		if (abs(average_interval) - GetTime(i->max_deviation_interval) < 
-			abs(average_interval) - GetTime(i->l_interval)) {
+		if (i->max_deviation_interval.GetMilliSeconds() < i->l_interval.GetMilliSeconds()) {
 				i->max_deviation_interval = i->l_interval;  
 			}
 		}
@@ -143,6 +142,7 @@ void IOTApplication::PacketParse(Ptr<Packet> packet) {
 void IOTApplication::PacketFlowClear() {
 	vector_packet_flow.clear();
 	m_env->vector_features.clear();
+	m_env->m_is_attack = is_attack[m_id];
 	is_attack[m_id] = 0;
 }
 
@@ -156,12 +156,12 @@ void IOTApplication::PacketFlowConvert() {
 
 		uint16_t n = i->packet_number;
 		f.average_size_packet = i->sum_size_packet / n;
-		f.average_ttl = i->sum_ttl / n;
-		f.s_time = GetTime(i->s_time);
-		f.l_time = GetTime(i->l_time);
-		f.duration = GetTime(i->duration);
-		f.average_interval = GetTime(i->sum_interval) / n;
-		f.max_deviation_interval = GetTime(i->max_deviation_interval);
+		//f.average_ttl = i->sum_ttl / n;
+		f.s_time = i->s_time.GetMilliSeconds();
+		f.l_time = i->l_time.GetMilliSeconds();
+		f.duration = i->duration.GetMilliSeconds();
+		f.average_interval = i->sum_interval.GetMilliSeconds() / n;
+		f.max_deviation_interval = i->max_deviation_interval.GetMilliSeconds();
 
 		m_env->vector_features.push_back(f);
 	}

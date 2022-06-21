@@ -5,6 +5,7 @@
 #include "env.h"
 
 int16_t reward_tp, reward_fp, reward_tn, reward_fn;
+int num_env = 0;
 
 namespace ns3 {
   NS_LOG_COMPONENT_DEFINE ("IotEnv");
@@ -21,8 +22,7 @@ namespace ns3 {
     tp = 0;
     tn = 0;
     dataset_file.open ("example.csv");
-    dataset_file << "№,pack_num,pack_size,ttl,duration,interval,deviation_interval,is_attack" << std::endl;
-    dataset_file << "\n";
+    dataset_file << "№,pack_num,pack_size,duration,interval,deviation_interval,is_attack" << std::endl;
     Simulator::Schedule (Seconds(0.0), &IotEnv::ScheduleNextStateRead, this);
   }
 
@@ -36,8 +36,9 @@ namespace ns3 {
     fn = 0;
     tp = 0;
     tn = 0;
-    dataset_file.open ("example.csv");
-    dataset_file << "\n";
+    std::string name = "dataset" + std::to_string(num_env) + '_' + std::to_string(m_agentId) + ".csv";
+    dataset_file.open (name);
+    dataset_file << "№,pack_num,pack_size,duration,interval,deviation_interval,is_attack" << std::endl;
 
     Simulator::Schedule (Seconds(0.0), &IotEnv::ScheduleNextStateRead, this);
   }
@@ -74,7 +75,7 @@ namespace ns3 {
   /*Define observation space*/
   Ptr<OpenGymSpace> IotEnv::GetObservationSpace()
   {
-    uint32_t nodeNum = 9;
+    uint32_t nodeNum = 6;
     uint16_t low = 0.0;
     uint16_t high = std::numeric_limits<uint16_t>::max();
     std::vector<uint32_t> shape = {nodeNum,};
@@ -95,12 +96,12 @@ namespace ns3 {
   Ptr<OpenGymDataContainer> IotEnv::GetObservation()
   {
     m_application->PacketFlowConvert();
-    uint32_t parameterNum = 9;
+    uint32_t parameterNum = 6;
     uint32_t number_packet = vector_features.size();
     std::vector<uint32_t> shape = {number_packet,parameterNum};
     Ptr<OpenGymBoxContainer<int64_t>> box = CreateObject<OpenGymBoxContainer<int64_t>>(shape);
 
-    for (uint32_t i = 0; i< vector_features.size(); i++){
+    for (uint32_t i = 0; i < vector_features.size(); i++){
       //box->AddValue(DynamicCast<uint32_t>(m_sendEvent));
       // for (uint8_t j = 0; j < 16; j++)
       //   box->AddValue(vector_features[i].addrs[j]);
@@ -108,16 +109,18 @@ namespace ns3 {
       // box->AddValue(vector_features[i].port);
       box->AddValue(vector_features[i].packet_number);
       box->AddValue(vector_features[i].average_size_packet);
-      box->AddValue(vector_features[i].average_ttl);
+      // box->AddValue(vector_features[i].average_ttl);
       // box->AddValue(vector_features[i].s_time);
       // box->AddValue(vector_features[i].l_time);
       box->AddValue(vector_features[i].duration);
       box->AddValue(vector_features[i].average_interval);
       box->AddValue(vector_features[i].max_deviation_interval);
 
+      bool is_att = is_attack[m_agentId] || m_is_attack ? 1: 0;
+
       dataset_file << i << "," << vector_features[i].packet_number << ',' << vector_features[i].average_size_packet <<
-      ',' << vector_features[i].average_ttl << ',' << vector_features[i].duration << ',' <<  vector_features[i].average_interval <<
-      ',' << vector_features[i].max_deviation_interval << ',' << *is_attack << std::endl;
+      ',' << vector_features[i].duration << ',' <<  vector_features[i].average_interval <<
+      ',' << vector_features[i].max_deviation_interval << ',' << is_att << std::endl;
     }
     // // Print data
     // //NS_LOG_INFO ("MyGetObservation: " << box);
@@ -162,7 +165,8 @@ namespace ns3 {
   /*Define extra info. Optional*/
   std::string IotEnv::GetExtraInfo()
   {
-    std::string info = "IsAttack " + std::to_string(*is_attack);
+    bool is_att = is_attack[m_agentId] || m_is_attack ? 1: 0;
+    std::string info = "IsAttack " + std::to_string(is_att);
     info += " FP " + std::to_string(fp);
     info +=  " FN " + std::to_string(fn);
     info +=  " TP " + std::to_string(tp);
@@ -174,6 +178,7 @@ namespace ns3 {
   /*Execute received actions*/
   bool IotEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
   {
+    bool is_att = is_attack[m_agentId] || m_is_attack ? 1: 0;
     Ptr<OpenGymBoxContainer<int32_t> > box = DynamicCast<OpenGymBoxContainer<int32_t>>(action);
     int pred_clear_traffic = box->GetValue(0),
         pred_anomaly =  box->GetValue(1);
@@ -183,11 +188,11 @@ namespace ns3 {
     tp = 0;
     tn = 0;
 
-    if (is_attack[m_agentId] && pred_anomaly) {
+    if (is_att && pred_anomaly) {
         tn = 1;
         cur_reward = reward_tn;
     }
-    else if (is_attack[m_agentId] && pred_clear_traffic) {
+    else if (is_att && pred_clear_traffic) {
       cur_reward = reward_fp;
       fp = 1;
     }

@@ -47,7 +47,7 @@
 #define MAX_STEP 30000
 
 extern bool *is_attack;
-
+extern int num_env;
 namespace ns3 {
 
   struct features {
@@ -89,6 +89,7 @@ namespace ns3 {
     std::vector<struct features> vector_features;
     EventId m_sendEvent;
     uint32_t m_port;
+    bool m_is_attack;
     Ipv4Address m_address;
     IApplicationBase* m_application;
 
@@ -98,6 +99,7 @@ namespace ns3 {
     uint32_t m_agentId;
     uint32_t fp, fn, tp, tn;
     Time m_interval;
+    
     std::string name_file = "dataset.csv";
     std::ofstream dataset_file;
   };

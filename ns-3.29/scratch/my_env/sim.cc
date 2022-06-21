@@ -80,6 +80,7 @@ int  main (int argc, char *argv[])
 	if (argc > 1) {
 		std::string s_port = argv[1];
 		iot_port = std::stoi(s_port);
+		num_env = std::stoi(argv[2]);
 	}
 
 	srand (time(NULL) + iot_port);

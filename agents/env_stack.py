@@ -52,13 +52,12 @@ class AgentEnvWrapper:
 
 
 class EnvWrapper:
-    def __init__(self, port, nagents):
+    def __init__(self, port, nagents, num_env):
         self.port = port
         self.nagents = nagents
 
         os.chdir('./../ns-3.29/')
-        print(os.getcwd())
-        cmd = f'./waf --run "my_env {self.port}"'
+        cmd = f'./waf --run "my_env {self.port} {num_env}"'
         th = threading.Thread(target=os.system, args=(cmd,))
         th.start()
 
@@ -79,7 +78,7 @@ class EnvWrapper:
 
 class EnvStack:
     def __init__(self, conf):
-        envs = [EnvWrapper(conf.port+conf.num_agent*i, conf.num_agent) for i in range(conf.num_env)]
+        envs = [EnvWrapper(conf.port+conf.num_agent*i, conf.num_agent, i) for i in range(conf.num_env)]
 
         self.nenv = conf.num_env
         self.main_end = []
