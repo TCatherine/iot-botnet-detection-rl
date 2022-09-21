@@ -4,6 +4,7 @@ import torch
 import policy
 import mlflow
 
+
 def init_mlflow(experiment_name):
     mlflow.set_tracking_uri('mlruns/')
     try:
@@ -12,13 +13,14 @@ def init_mlflow(experiment_name):
         print(f'Experiment {experiment_name} already exist')
     mlflow.set_experiment(experiment_name)
 
+
 def loop(data, res):
     res = np.array([np.array(x) for x in res])
     learning_rate = 0.00003
     loss = torch.nn.CrossEntropyLoss(reduction='mean')
     max_number_flows = 20
     number_features = 5
-    net = policy.SimplePolicyArchitecture(number_features, max_number_flows, 'simple_network.pth')
+    net = policy.RecurrentPolicyArchitecture(number_features, max_number_flows, 'simple_network.pth')
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
     # true positive, true negative
@@ -47,12 +49,12 @@ def loop(data, res):
 
             idx = 0
             if Q_value[0][0] < Q_value[0][1]:
-                idx=1
+                idx = 1
 
-            if r[idx]==1:
-                true_res[idx]+=1
+            if r[idx] == 1:
+                true_res[idx] += 1
             else:
-                false_res[idx]+=1
+                false_res[idx] += 1
             # print(res_loss.detach().tolist(), Q_value.detach().tolist(), r)
 
             mlflow.log_metric(f"loss", res_loss.detach().tolist())
@@ -61,7 +63,8 @@ def loop(data, res):
         mlflow.log_metric(f"fp", false_res[0])
         mlflow.log_metric(f"fn", false_res[1])
         print(f'true_res(tp, tn) = {true_res}', f'false_res(fp, fn) = {false_res}')
-        print(f'accuarcy = {sum(true_res)/(sum(true_res)+sum(false_res))}')
+        print(f'accuarcy = {sum(true_res) / (sum(true_res) + sum(false_res))}')
+
 
 def parse_file_with_union(file_name):
     fixed_df = pd.read_csv(file_name, sep=',')
@@ -81,7 +84,7 @@ def parse_file_with_union(file_name):
         is_attack = fixed_df.loc[start_idx:start_idx, 'is_attack'].values
         target[int(is_attack)] = 1
 
-        flows = fixed_df.loc[start_idx:i-1, values_name].values
+        flows = fixed_df.loc[start_idx:i - 1, values_name].values
         data.append(flows)
 
         res.append(target)
@@ -89,6 +92,7 @@ def parse_file_with_union(file_name):
         start_idx = i
 
     return data, res
+
 
 if __name__ == "__main__":
     path = "../ns-3.29/"

@@ -3,6 +3,7 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE, MDS
 
+
 def add_point(ax, finalDf):
     targets = [0, 1]
     colors = ['r', 'g']
@@ -12,6 +13,7 @@ def add_point(ax, finalDf):
                    , finalDf.loc[indicesToKeep, 'principal component 2']
                    , c=color
                    , s=50)
+
 
 def pca_graph():
     fig = plt.figure(figsize=(8, 8))
@@ -34,7 +36,7 @@ def parse_file_with_union(file_name):
             prev_idx = num
             continue
         res = fixed_df.loc[start_idx:start_idx, 'is_attack'].to_frame()
-        flows = fixed_df.loc[start_idx:i-1, values_name]
+        flows = fixed_df.loc[start_idx:i - 1, values_name]
         ins = flows.mean().to_frame().T
         new_Df = pd.concat([new_Df, ins], axis=0)
         res_Df = pd.concat([res_Df, res], axis=0)
@@ -46,6 +48,7 @@ def parse_file_with_union(file_name):
 
     return new_Df.values, res_Df
 
+
 def parse_file(file_name):
     fixed_df = pd.read_csv(file_name, sep=',')
 
@@ -53,8 +56,9 @@ def parse_file(file_name):
     data = fixed_df.loc[:, values_name].values
     return data, fixed_df[['is_attack']]
 
+
 def get_tSNE(data, res):
-    tsne = TSNE(n_components=2, init = 'random')
+    tsne = TSNE(n_components=2, init='random')
     principalComponents = tsne.fit_transform(data)
     principalDf = pd.DataFrame(data=principalComponents
                                , columns=['principal component 1', 'principal component 2'])
@@ -70,6 +74,7 @@ def get_PCA(data, res):
     finalDf = pd.concat([principalDf, res], axis=1)
     add_point(ax, finalDf)
 
+
 def get_MDS(data, res):
     mds = MDS(n_components=2)
     principalComponents = mds.fit_transform(data)
@@ -77,6 +82,7 @@ def get_MDS(data, res):
                                , columns=['principal component 1', 'principal component 2'])
     finalDf = pd.concat([principalDf, res], axis=1)
     add_point(ax, finalDf)
+
 
 if __name__ == "__main__":
     path = "../ns-3.29/"
