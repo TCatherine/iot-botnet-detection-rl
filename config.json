@@ -1,38 +1,78 @@
 {
-"GeneralInfo": {
-	"Number Agents": 3,
-	"Number Env": 1,
-	"Number Clients": 5,
-	"Number Bots": 15,
-	"First Port":5555,
-	"Number Features": 7,
-	"IsTracing": false,
-	"IsEnableCommunication": 0,
-	"IsFeature": 0,
-	"WeightPath": [
-		"simple_model.pth",
-		"agents_with_com0.pth",
-		"agents_with_com1.pth"
-		],
-	"Reward": {
-		"TP":1,
-		"TN":1,
-		"FP":-1,
-		"FN":-1			
-		}
-	},
-"Config Clear Traffic": {
-	"DataRate": ["5Mbps", "14Kbps", "8048kbps"],
-	"PacketSize": [56, 600, 512, 1024, 1040],
-	"Delay": ["2ms", "1ms"],
-	"Number Packets": [1, 2, 3, 4, 5]
-	},
-"Config DDOS": {
-	"DataRate": ["25Mbps", "50Mbps", "125Mbps", "20480Kbps"],
-	"PacketSize": [56, 600, 512, 1024, 1040],
-	"Delay": ["1ms", "0.1ms"],
-	"Number Packets": [1, 2, 5, 10, 15]
-	}
+  "GeneralInfo": {
+    "Number Agents": 3,
+    "Number Env": 1,
+    "Number Clients": 5,
+    "Number Bots": 15,
+    "First Port": 5555,
+    "Number Features": 5,
+    "IsTracing": true,
+    "IsEnableCommunication": true,
+    "IsFeature": 0,
+    "max_number_flows": 20,
+    "WeightPath": [
+      "simple_model.pth",
+      "agents_with_com0.pth",
+      "agents_with_com1.pth"
+    ],
+    "Reward": {
+      "TP": 0,
+      "TN": 0,
+      "FP": -1,
+      "FN": -1
+    }
+  },
+  "Config Clear Traffic": {
+    "DataRate": [
+      "5Mbps",
+      "14Kbps",
+      "8048kbps"
+    ],
+    "PacketSize": [
+      56,
+      600,
+      512,
+      1024,
+      1040
+    ],
+    "Delay": [
+      "2ms",
+      "1ms"
+    ],
+    "Number Packets": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "Config DDOS": {
+    "DataRate": [
+      "25Mbps",
+      "50Mbps",
+      "125Mbps",
+      "20480Kbps"
+    ],
+    "PacketSize": [
+      56,
+      600,
+      512,
+      1024,
+      1040
+    ],
+    "Delay": [
+      "1ms",
+      "0.1ms"
+    ],
+    "Number Packets": [
+      1,
+      2,
+      5,
+      10,
+      15
+    ]
+  }
 }
 
 

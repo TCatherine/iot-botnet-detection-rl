@@ -45,11 +45,10 @@ Ipv6Address CreateStackProtocol(Ptr<Node> node, Ipv6AddressHelper& ipv6, Ptr<Nod
     csma.SetChannelAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   	csma.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
   	csma.SetDeviceAttribute ("Mtu", UintegerValue (1500));
-	if (is_tracing && is_iot) {
+
 		AsciiTraceHelper ascii;
   		csma.EnableAsciiAll (ascii.CreateFileStream ("pcap.tr"));
 		csma.EnablePcapAll("pcap");
-	}
 
 	Ptr<LrWpanNetDevice> dev0 = CreateObject<LrWpanNetDevice> ();
 	// SixLowPanHelper sixlowpan;
