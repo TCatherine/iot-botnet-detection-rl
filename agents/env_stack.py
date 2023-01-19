@@ -11,6 +11,7 @@ import select
 import termios
 import tty
 
+
 def worker(main_e, work_e, env, idx):
     main_e.close()
     while True:
@@ -28,6 +29,7 @@ def worker(main_e, work_e, env, idx):
             work_e.send(res[1])
             work_e.send(res[2])
             work_e.send(res[3])
+
 
 class AgentEnvWrapper:
     def __init__(self, port, id):
@@ -61,7 +63,7 @@ class EnvWrapper:
         th = threading.Thread(target=os.system, args=(cmd,))
         th.start()
 
-        self.agent_env = [AgentEnvWrapper(self.port + i, i+1) for i in range(self.nagents)]
+        self.agent_env = [AgentEnvWrapper(self.port + i, i + 1) for i in range(self.nagents)]
 
     def init_simulation(self, idx):
         self.agent_env[idx].init_simulation()
@@ -78,7 +80,7 @@ class EnvWrapper:
 
 class EnvStack:
     def __init__(self, conf):
-        envs = [EnvWrapper(conf.port+conf.num_agent*i, conf.num_agent, i) for i in range(conf.num_env)]
+        envs = [EnvWrapper(conf.port + conf.num_agent * i, conf.num_agent, i) for i in range(conf.num_env)]
 
         self.nenv = conf.num_env
         self.main_end = []
@@ -100,7 +102,7 @@ class EnvStack:
             pa = []
             for m, w, env in zip(temp_main, temp_work, envs):
                 p = mp.Process(target=worker, args=(m, w, env, i))
-                idx+=1
+                idx += 1
                 pa.append(p)
             self.ps.append(pa)
 
@@ -138,7 +140,6 @@ class EnvStack:
             m.send(('close', None))
         for proc in self.ps[idx]:
             proc.join()
-
 
     def ini_simulation(self, idx):
         for m in self.main_end[idx]:

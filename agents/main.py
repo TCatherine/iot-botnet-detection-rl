@@ -1,105 +1,115 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-
-from agent import Agent
+from agent import Agent, AgentSync
 from communicator import Communicator
 from env_stack import EnvStack
-import json
+
 from threading import Thread
 import mlflow
 import time
-
-class Configuretion:
-    def __init__(self, config_path):
-        config_file = open(config_path, "r")
-        json_string = json.load(config_file)["GeneralInfo"]
-        self.num_agent = json_string["Number Agents"]
-        self.num_env = json_string["Number Env"]
-        self.port = json_string["First Port"]
-        self.n_features = json_string["Number Features"]
-        self.is_enable_communication = json_string["IsEnableCommunication"]
-        self.is_feature = json_string["IsFeature"]
-        path_list = json_string["WeightPath"]
-        idx = ((2 if self.is_feature else 1) if self.is_enable_communication else 0)
-        self.weight_path = path_list[idx]
-        self.experiment_name = f'Agents'
-        self.experiment_name += (f'-with-communicat{1 if self.is_feature else 0}' if self.is_enable_communication else '')
+from utils import Configuretion, plot_roc, add_metrics, init_mlflow
+from experience_replay import ExperienceReplay
 
 
-def add_metrics(string, fp, fn, tp, tn):
-    for str in string:
-        words = str.split(' ')
-        fp += int(words[3])
-        fn += int(words[5])
-        tp += int(words[7])
-        tn += int(words[9])
-    return fp, fn, tp, tn
-
-def main_loop(idx, agent, envs, steps=201):
+def main_loop(agent: Agent, envs, steps=501):
     fp, fn, tp, tn = 0, 0, 0, 0
     total_reward = 0
     local_reward = 0
-    # agent.policy.save_onnx(path = 'model.onnx')
-    obs = envs.reset(idx)
-    is_attack = [0] * agent.nenvs
+
+    obs = envs.reset(agent.idx)
+
+    obs = agent.fix_non_valid_state(obs)
+    obs = agent.add_communication_to_state(obs)
+
+    a = []
+    warmup_epochs = 10
     for itr in range(steps):
-        action = agent.select_action(list(obs), is_attack)
-        next_obs, reward, done, info = envs.step(idx, action)
+
+        action, q_values = agent.select_action(obs)
+        next_obs, reward, done, info = envs.step(agent.idx, action)
+
+        next_obs = agent.fix_non_valid_state(next_obs)
+        next_obs = agent.add_communication_to_state(next_obs)
+
+        agent.em.add(obs, action, reward, next_obs)
+
         is_attack = [(int(i.split(' ')[1])) for i in info]
+        a.append((itr, q_values, is_attack))
         total_reward += sum(reward)
         local_reward += sum(reward)
 
-        loss = agent.train(action, reward, obs)
+        if len(agent.em) > warmup_epochs:
+            loss = agent.train()
 
         fp, fn, tp, tn = add_metrics(info, fp, fn, tp, tn)
-        if agent.is_enable_com:
-            agent.share_knowledge()
+        print(f'{fp=}, {fn=}, {tp=}, {tn=}')
 
-        if itr and itr % 1 == 0:
-            print('[Agent {}] Step {} Loss: {} Reward: {}({})' .format(idx, itr+1, loss, agent.reward, total_reward))
-            mlflow.log_metric(f"loss {idx}", loss.tolist())
-            mlflow.log_metric(f"reward {idx}", total_reward)
-            if itr and itr % 10 == 0:
-                agent.eps -= 0.05 if agent.eps > 0.05 else 0.05
-                mlflow.log_metric(f"local reward {idx}", local_reward)
-                mlflow.log_metric(f"false positive {idx}", fp)
-                mlflow.log_metric(f"false negative {idx}", fn)
-                mlflow.log_metric(f"true positive {idx}", tp)
-                mlflow.log_metric(f"true negative {idx}", tn)
-                agent.policy.save_model(agent.policy.path)
+        if len(agent.em) > warmup_epochs and itr % 1 == 0:
+
+            print(f'agent_{agent.idx}, Step {itr + 1} Loss: {loss:0.3} Reward: {total_reward}')
+            mlflow.log_metric(f"loss {agent.idx}", loss, step=itr)
+            mlflow.log_metric(f"reward {agent.idx}", total_reward, step=itr)
+            if len(agent.em) > warmup_epochs and itr % 20 == 0:
+                agent.update_target_weights()
+
+                mlflow.log_metric(f"local reward {agent.idx}", local_reward, step=itr)
+                mlflow.log_metric(f"false positive {agent.idx}", fp, step=itr)
+                mlflow.log_metric(f"false negative {agent.idx}", fn, step=itr)
+                mlflow.log_metric(f"true positive {agent.idx}", tp, step=itr)
+                mlflow.log_metric(f"true negative {agent.idx}", tn, step=itr)
+                # agent.policy.save_model(agent.policy.path)
                 fp, fn, tp, tn = 0, 0, 0, 0
                 local_reward = 0
 
-    envs.close(idx)
+        agent.eps = agent.eps - agent.eps_delta
+        obs = next_obs
 
-def init_mlflow(experiment_name):
-    mlflow.set_tracking_uri('mlruns/')
-    try:
-        mlflow.create_experiment(experiment_name)
-    except:
-        print(f'Experiment {experiment_name} already exist')
-    mlflow.set_experiment(experiment_name)
+        if itr % 10 == 0 and itr > 0:
+            plot_roc(a, itr, agent.idx)
 
-def single_thread_pipeline(idx, agent, envs):
-    print('idx ', idx)
-    envs.ini_simulation(idx)
-    main_loop(idx, agent, envs)
+    envs.close(agent.idx)
+
+
+def single_thread_pipeline(agent, envs):
+    envs.ini_simulation(agent.idx)
+    main_loop(agent, envs)
+
+
+def get_agents(conf: Configuretion, comm, em):
+    if conf.is_enable_communication:
+        agents = [AgentSync(idx=idx,
+                            num_features=conf.n_features,
+                            num_envs=conf.num_env,
+                            is_feature=conf.is_feature,
+                            comm=comm,
+                            em=em
+                            ) for idx in range(conf.num_agent)]
+    else:
+        agents = [Agent(idx=idx,
+                        num_features=conf.n_features,
+                        num_envs=conf.num_env,
+                        em=em
+                        ) for idx in range(conf.num_agent)]
+
+    return agents
+
 
 if __name__ == "__main__":
     config_path = "../config.json"
     conf = Configuretion(config_path)
-    linker = Communicator(conf.n_features)
+    comm = Communicator(conf.num_agent)
 
-    agent = Agent(conf.n_features, conf.num_env, conf.is_enable_communication,
-                  conf.is_feature, Communicator(conf.n_features), conf.weight_path)
+    if conf.is_enable_communication:
+        em = ExperienceReplay('experience_sync.pickle')
+    else:
+        em = ExperienceReplay('experience.pickle')
+
+    agents = get_agents(conf, comm, em)
     envs = EnvStack(conf)
-    time.sleep(15)
+    time.sleep(20)
 
     init_mlflow(conf.experiment_name)
-    with mlflow.start_run():
-        list_threads = [Thread(target=single_thread_pipeline, args=(idx, agent, envs))
-                        for idx in range(conf.num_agent)]
+    # with mlflow.start_run():
+    list_threads = [Thread(target=single_thread_pipeline, args=(agents[idx], envs))
+                    for idx in range(conf.num_agent)]
     for thread in list_threads:
         thread.start()
 

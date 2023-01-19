@@ -83,27 +83,27 @@ void BotApplication::StartApplication (void)
 	m_socket->SetSendCallback (MakeCallback (&BotApplication::HandleSend, this));
 		
 
-	std::cout << "[Bot " << m_id << "]  Start Application" << std::endl;
+//	std::cout << "[Bot " << m_id << "]  Start Application" << std::endl;
 	Schedule();
 }
 
 void BotApplication::Schedule() {
 	// std::cout << "Sim: " << Simulator::Now() << " Start: " << timer->start << " End: " << timer->finish << std::endl;
 	if (timer->finish >= Simulator::Now() && timer->start <= Simulator::Now()) {
-		if (is_start) {
-			std::cout << "Bot " << m_id << " Application Start" << std::endl;
-		}
+//		if (is_start) {
+//			std::cout << "Bot " << m_id << " Application Start" << std::endl;
+//		}
 		is_start = false;
 		timer->trigger = false;
+		Send();
 		for (uint8_t i = 0; i < number_of_iot; i++)
 			is_attack[i] = 1;
-		Send();
 		Simulator::Schedule (timer->interval, &BotApplication::Schedule, this);
 	}
 	else {
 		is_start = true;
 		botnet_timer_setup();
-		std::cout << "Bot " << m_id << " Application Pause [ " << timer->start.GetMilliSeconds() << " millisec ]" << std::endl;
+//		std::cout << "Bot " << m_id << " Application Pause [ " << timer->start.GetMilliSeconds() << " millisec ]" << std::endl;
 		Simulator::Schedule (timer->start - Simulator::Now(), &BotApplication::Schedule, this);
 	}
 }

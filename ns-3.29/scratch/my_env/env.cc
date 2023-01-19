@@ -96,7 +96,7 @@ namespace ns3 {
   Ptr<OpenGymDataContainer> IotEnv::GetObservation()
   {
     m_application->PacketFlowConvert();
-    uint32_t parameterNum = 6;
+    uint32_t parameterNum = 5;
     uint32_t number_packet = vector_features.size();
     std::vector<uint32_t> shape = {number_packet,parameterNum};
     Ptr<OpenGymBoxContainer<int64_t>> box = CreateObject<OpenGymBoxContainer<int64_t>>(shape);
@@ -105,7 +105,7 @@ namespace ns3 {
       //box->AddValue(DynamicCast<uint32_t>(m_sendEvent));
       // for (uint8_t j = 0; j < 16; j++)
       //   box->AddValue(vector_features[i].addrs[j]);
-      box->AddValue(i);
+//      box->AddValue(i);
       // box->AddValue(vector_features[i].port);
       box->AddValue(vector_features[i].packet_number);
       box->AddValue(vector_features[i].average_size_packet);
